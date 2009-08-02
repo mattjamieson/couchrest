@@ -60,7 +60,7 @@ module CouchRest
             # Auto parse Time and Date objects
             if ((property.init_method == 'new') && target == 'Time') 
               self[property.name] = self[key].is_a?(String) ? Time.parse(self[key].dup) : self[key]
-            elsif (propery.init_method == 'new' && target == 'Date')
+            elsif (property.init_method == 'new' && target == 'Date')
               self[property.name] = self[key].is_a?(String) ? Date.parse(self[key].dup) : self[key]
             else
               # Let people use :send as a Time parse arg
