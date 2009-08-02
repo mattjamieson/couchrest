@@ -1,4 +1,5 @@
 require 'time'
+require 'date'
 require File.join(File.dirname(__FILE__), '..', 'more', 'property')
 
 module CouchRest
@@ -44,15 +45,23 @@ module CouchRest
             next unless self[key]
             klass = ::CouchRest.constantize(target[0])
             self[property.name] = self[key].collect do |value|
-              # Auto parse Time objects
-              obj = ( (property.init_method == 'new') && klass == Time) ? Time.parse(value) : klass.send(property.init_method, value)
+              # Auto parse Time and Date objects
+              if (property.init_method == 'new' && klass == Time)
+                obj = Time.parse(value)
+              elsif (property.init_method == 'new' && klass == Date)
+                obj = Date.parse(value)
+              else
+                obj = klass.send(property.init_method, value)
+              end
               obj.casted_by = self if obj.respond_to?(:casted_by)
               obj
             end
           else
-            # Auto parse Time objects
-            self[property.name] = if ((property.init_method == 'new') && target == 'Time') 
-              self[key].is_a?(String) ? Time.parse(self[key].dup) : self[key]
+            # Auto parse Time and Date objects
+            if ((property.init_method == 'new') && target == 'Time') 
+              self[property.name] = self[key].is_a?(String) ? Time.parse(self[key].dup) : self[key]
+            elsif (propery.init_method == 'new' && target == 'Date')
+              self[property.name] = self[key].is_a?(String) ? Date.parse(self[key].dup) : self[key]
             else
               # Let people use :send as a Time parse arg
               klass = ::CouchRest.constantize(target)
